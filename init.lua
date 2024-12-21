@@ -32,9 +32,8 @@ vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
 end)
 
--- Enable break indent
+-- Enable break ndent
 vim.opt.breakindent = true
-
 -- Save undo history
 vim.opt.undofile = true
 
@@ -42,6 +41,20 @@ vim.opt.undofile = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
+-- Set the number of spaces per tab
+vim.opt.tabstop = 4
+
+-- Set the number of spaces for indentation
+vim.opt.shiftwidth = 4
+
+-- Use spaces instead of tabs
+vim.opt.expandtab = true
+
+-- Enable smart indentation
+vim.opt.smartindent = true
+
+-- Enable auto-indentation
+vim.opt.autoindent = true
 -- Keep signcolumn on by default
 vim.opt.signcolumn = 'yes'
 
@@ -158,6 +171,21 @@ require('lazy').setup({
         c = 'gcc -o ' .. vim.fn.expand '%:r' .. ' ' .. vim.fn.expand '%' .. ' && ./' .. vim.fn.expand '%:r', -- Compile and run C files
         rust = 'cargo run', -- Run Rust files with Cargo
         javascript = 'node ' .. vim.fn.expand '%',
+      }
+    end,
+  },
+  {
+    'nvim-tree/nvim-tree.lua',
+    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- optional, for file icons
+    config = function()
+      require('nvim-tree').setup {
+        -- Example settings (you can customize these)
+        hijack_netrw = true, -- Hijack netrw file explorer
+        update_cwd = true, -- Update the current working directory
+        view = {
+          width = 30,
+          side = 'left',
+        },
       }
     end,
   },
