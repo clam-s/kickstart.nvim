@@ -19,6 +19,15 @@ vim.opt.number = true
 -- vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
+vim.api.nvim_create_user_command('TestPy', function()
+  local current_file = vim.fn.expand '%:t' -- Get the current file name
+  local test_file = string.gsub(current_file, '%.py$', '-test.py') -- Replace .py with -test.py
+  if vim.fn.filereadable(test_file) == 1 then
+    vim.cmd('!pytest ' .. test_file) -- Run pytest on the test file
+  else
+    print('Test file not found: ' .. test_file)
+  end
+end, { nargs = 0 })
 vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
