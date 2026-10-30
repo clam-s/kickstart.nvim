@@ -180,6 +180,9 @@ require('lazy').setup({
         c = 'gcc -o ' .. vim.fn.expand '%:r' .. ' ' .. vim.fn.expand '%' .. ' && ./' .. vim.fn.expand '%:r', -- Compile and run C files
         rust = 'cargo run', -- Run Rust files with Cargo
         javascript = 'node ' .. vim.fn.expand '%',
+        filetype = {
+          java = 'cd $dir && java $fileName', -- Run the current Java source file
+        },
       }
     end,
   },
@@ -581,6 +584,18 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         clangd = {},
+        jdtls = {
+          settings = {
+            java = {
+              project = {
+                referencedLibraries = {
+                  'lib/**/*.jar',
+                  '/home/aydin/code/uni/cs118/courswork1/maze-environment.jar',
+                },
+              },
+            },
+          },
+        },
         -- gopls = {},
         pyright = {},
         rust_analyzer = {},
@@ -622,21 +637,16 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'google-java-format',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-      require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
-      }
+      -- Mason 2 uses Neovim's native LSP configuration API.
+      for server_name, server in pairs(servers) do
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        vim.lsp.config(server_name, server)
+      end
+      require('mason-lspconfig').setup { ensure_installed = vim.tbl_keys(servers) }
     end,
   },
 
@@ -674,6 +684,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        java = { 'google-java-format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -855,11 +866,13 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'master', -- Compatible with Neovim 0.11 and nvim-treesitter.configs
+    lazy = false,
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'java', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
